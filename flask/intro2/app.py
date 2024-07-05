@@ -87,7 +87,6 @@ def update_student():
   return jsonify({'message':"Student updated",'student':{    'name':exist_student.name,
       'email':exist_student.email}}),200
 
-# DELETE, 
 # Identify the student, delete. <id>
 @app.route("/student",methods=["DELETE"])
 def delete_student():
