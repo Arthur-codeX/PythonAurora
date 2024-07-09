@@ -1,10 +1,13 @@
 from flask import Blueprint,jsonify,request
 
-from . import db
+from flask_jwt_extended import create_access_token,JWTManager
+
+from . import db,bcrypt
+
+from datetime import timedelta,datetime,timezone
 
 from .models import Member
 
-import bcrypt
 
 auth_blueprint=Blueprint('auth',__name__)
 
@@ -33,10 +36,34 @@ def signup():
     if existing_member:
         return jsonify({'message':f"Email already in use {email}"}),400
     
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf8')
     
     member=Member(alias=alias,email=email,password=hashed_password)
     db.session.add(member)
     db.session.commit()
     return jsonify({"message":"Sign up success"}),201
+    
+@auth_blueprint.route("/login",methods=["POST"])
+def login():
+    body=request.get_json()
+    email=body.get('email')
+    password=body.get('password')
+
+        ## Validation
+    if not email or not password:
+        return jsonify({'message':"Required field missing"}),400
+    user=Member.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({'message':"User not found"}),400
+    
+    pass_ok=bcrypt.check_password_hash(user.password.encode('utf-8'),password)
+    
+    expires=datetime.utcnow()+timedelta(hours=24)
+    ## ACCESS TOKEN
+    access_token=create_access_token(identity=user.details(),expires_delta=(expires-datetime.utcnow()))
+    if not pass_ok:
+        return jsonify({"message":"Invalid password"}),401
+    return jsonify({'user':user.details(),'token':access_token})
+    
     

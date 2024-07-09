@@ -1,13 +1,22 @@
 # DB CONNECTION
+# ENVIRONMENT VARIABLES
+from datetime import datetime, timedelta
+
+from dotenv import load_dotenv
+
+import os
+
+load_dotenv()
 
 conf={
-    'dbname':'postgres',
-    'user':'postgres.erojatpkqtqexubknucv',
-    'password':'4zY63KNsPFznj2oX',
-    'host':'aws-0-ap-south-1.pooler.supabase.com',
+    'dbname':os.getenv('db_name'),
+    'user':os.getenv('db_user'),
+    'password':os.getenv('db_password'),
+    'host':os.getenv('db_host'),
     'port':'5432'
 }
 
-
 class Config:
     SQLALCHEMY_DATABASE_URI=f"postgresql://{conf['user']}:{conf['password']}@{conf['host']}:5432/postgres"
+    JWT_SECRET_KEY=os.getenv('jwt_secret_key')
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=20)
