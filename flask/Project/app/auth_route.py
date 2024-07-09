@@ -6,7 +6,11 @@ from . import db,bcrypt
 
 from datetime import timedelta,datetime,timezone
 
-from .models import Member
+from .models import Member,Game
+
+from .game_engine import create_board,init_knight,init_rook
+
+import json
 
 
 auth_blueprint=Blueprint('auth',__name__)
@@ -54,16 +58,35 @@ def login():
         return jsonify({'message':"Required field missing"}),400
     user=Member.query.filter_by(email=email).first()
 
+ 
     if not user:
         return jsonify({'message':"User not found"}),400
     
     pass_ok=bcrypt.check_password_hash(user.password.encode('utf-8'),password)
     
+    if not pass_ok:
+        return jsonify({"message":"Invalid password"}),401
+
     expires=datetime.utcnow()+timedelta(hours=24)
     ## ACCESS TOKEN
     access_token=create_access_token(identity=user.details(),expires_delta=(expires-datetime.utcnow()))
-    if not pass_ok:
-        return jsonify({"message":"Invalid password"}),401
+   
+    if not user.game:
+        member_id=user.id
+        board=create_board()
+        knight_x=init_knight['x']
+        knight_y=init_knight['y']
+        rook_x=init_rook['x']
+        rook_y=init_rook['y']
+        board[knight_y][knight_x]="BN"
+        board[rook_y][rook_x]="WR"
+        print(board)
+        board=json.dumps(board)
+        print(board)
+        game=Game(member_id=member_id,board=board,rook_x=rook_x,rook_y=rook_y,knight_x=knight_x,knight_y=knight_y)
+        db.session.add(game)
+        db.session.commit()
+
     return jsonify({'user':user.details(),'token':access_token})
     
     

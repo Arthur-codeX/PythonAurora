@@ -14,6 +14,8 @@ board = [
     ["W-A8,BR", "B-B8,  ", "W-C8,  ", "B-D8,  ", "W-E8,  ", "B-F8,  ", "W-G8,  ", "B-H8,  "]
 ]
 
+# type of board
+
 knight = {"x": 1, "y": 0}
 rook = {"x": 0, "y": 7}
 
