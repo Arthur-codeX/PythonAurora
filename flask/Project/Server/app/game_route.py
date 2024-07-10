@@ -4,7 +4,7 @@ from .models import Game
 
 from . import db
 
-from .game_engine import rookPosibleMoves,toHumanCordinates,make_move,knightPosibleMoves,pc_make_move
+from .game_engine import rookPosibleMoves,toHumanCordinates,make_move,knightPosibleMoves,pc_make_move,create_board,init_knight,init_rook
 
 import json
 
@@ -95,8 +95,35 @@ def possible_moves():
     if not game:
         return jsonify({'message':"Game not found"}),400
     rook = {"x": game.rook_x, "y": game.rook_y}
+    board=json.loads(game.board)
     moves=rookPosibleMoves(rook)
     human_co=toHumanCordinates(moves)
 
-    return jsonify({'moves':moves,'human_co':human_co}),200
+    for move in moves:
+        piece=board[move['x']][move['y']]
+        if piece=="":
+            board[move['y']][move['x']]="X"
 
+    return jsonify({'moves':moves,'human_co':human_co,"board":board}),200
+
+@game_blueprint.route("/game/new-game",methods=["GET"])
+@jwt_required()
+def new_game():
+    current_user=get_jwt_identity()
+    game=Game.query.filter_by(member_id=current_user['id']).first()
+    if not game:
+        return jsonify({'message':"Game not found"}),400
+    board=create_board()
+    knight_x=init_knight['x']
+    knight_y=init_knight['y']
+    rook_x=init_rook['x']
+    rook_y=init_rook['y']
+    board[knight_y][knight_x]="BN"
+    board[rook_y][rook_x]="WR"
+    board=json.dumps(board)
+    game.board=board
+    game.knight_x=knight_x
+    game.knight_y=knight_y
+    game.rook_x=rook_x
+    game.rook_y=rook_y
+    db.session.commit()
