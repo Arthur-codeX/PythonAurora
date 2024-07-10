@@ -62,6 +62,7 @@ def login():
     if not user:
         return jsonify({'message':"User not found"}),400
     
+    
     pass_ok=bcrypt.check_password_hash(user.password.encode('utf-8'),password)
     
     if not pass_ok:
@@ -69,7 +70,7 @@ def login():
 
     expires=datetime.utcnow()+timedelta(hours=24)
     ## ACCESS TOKEN
-    access_token=create_access_token(identity=user.details(),expires_delta=(expires-datetime.utcnow()))
+    access_token=create_access_token(identity={"id":user.id,"alias":user.alias,"role":"cats and dogs"},expires_delta=(expires-datetime.utcnow()))
    
     if not user.game:
         member_id=user.id

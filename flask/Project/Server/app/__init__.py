@@ -7,6 +7,8 @@ from flask_bcrypt import Bcrypt
 
 from flask_jwt_extended import JWTManager
 
+from flask_cors import CORS
+
 db=SQLAlchemy()
 migrate=Migrate()
 bcrypt = Bcrypt()
@@ -19,6 +21,8 @@ def create_app():
     bcrypt.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app,db)
+
+    CORS(app)
 
     from .auth_route import auth_blueprint
     from .game_route import game_blueprint

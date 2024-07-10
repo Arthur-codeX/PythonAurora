@@ -16,6 +16,14 @@ game_blueprint=Blueprint('game',__name__)
 ## get board
 ## make move
 
+@game_blueprint.route("/game/another",methods=["GET"])
+@jwt_required()
+def another():
+    current_user=get_jwt_identity()
+    print(current_user)
+    return "Another one"
+
+
 @game_blueprint.route("/game/board",methods=["GET"])
 @jwt_required()
 def get_board():
